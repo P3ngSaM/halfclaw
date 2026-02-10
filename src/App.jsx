@@ -152,21 +152,28 @@ function formatSeconds(value) {
 }
 
 async function synthesizeWithQwenTTS(text, voiceId) {
-  const response = await fetch("/api/tts", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text, voice: voiceId }),
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  try {
+    const response = await fetch("/api/tts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, voice: voiceId }),
+      signal: controller.signal,
+    });
 
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const msg = data?.error || `tts_http_${response.status}`;
-    throw new Error(msg);
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const msg = data?.error || `tts_http_${response.status}`;
+      throw new Error(msg);
+    }
+
+    const url = data?.url;
+    if (!url) throw new Error("tts_audio_url_missing");
+    return url;
+  } finally {
+    clearTimeout(timeout);
   }
-
-  const url = data?.url;
-  if (!url) throw new Error("tts_audio_url_missing");
-  return url;
 }
 
 /* ── WeChat-style voice wave (3 bars like real WeChat) ── */
@@ -447,8 +454,18 @@ function LandingPage({ theme, onToggleTheme }) {
       setVoiceState((p) => ({ ...p, [row.id]: "playing" }));
         setVoiceHint(`正在播放: ${selectedVoice.name}（${selectedVoice.desc}）`);
     } catch (error) {
-      try { await playFallback(row.id, row.text); setVoiceState((p) => ({ ...p, [row.id]: "playing" })); return; }
-      catch { setVoiceState((p) => ({ ...p, [row.id]: "error" })); setActiveVoiceId(""); setVoiceHint(`播放失败（${String(error?.message || "unknown")}）`); }
+      console.warn("[TTS] API failed, trying browser fallback:", error?.message);
+      try {
+        await playFallback(row.id, row.text);
+        setVoiceState((p) => ({ ...p, [row.id]: "playing" }));
+        setVoiceHint("正在使用浏览器语音播放（TTS服务暂不可用）");
+        return;
+      } catch (fbErr) {
+        console.error("[TTS] Fallback also failed:", fbErr?.message);
+        setVoiceState((p) => ({ ...p, [row.id]: "error" }));
+        setActiveVoiceId("");
+        setVoiceHint("播放失败：TTS服务暂不可用，请在本地访问体验完整语音效果");
+      }
     }
   }
 
