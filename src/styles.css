@@ -1283,7 +1283,67 @@ button { font-family: inherit; }
   font-weight: 600;
 }
 
-/* ═══════════ CYBER GIRLFRIEND ═══════════ */
+/* ═══════════ CYBER PARTNER CAROUSEL ═══════════ */
+
+/* Tabs */
+.cyber-partner-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-bottom: 2.5rem;
+}
+.cyber-partner-tab {
+  padding: 0.65rem 2rem;
+  border-radius: 999px;
+  border: 2px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.cyber-partner-tab:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+.cyber-partner-tab.active.cyber-partner-tab-gf {
+  background: linear-gradient(135deg, #e84393, #fd79a8);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 20px rgba(232, 67, 147, 0.35);
+}
+.cyber-partner-tab.active.cyber-partner-tab-bf {
+  background: linear-gradient(135deg, #0984e3, #74b9ff);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 20px rgba(9, 132, 227, 0.35);
+}
+
+/* Boyfriend accent variant */
+.cyber-partner-bf .cyber-gf-feat-icon {
+  color: #0984e3;
+  background: rgba(9, 132, 227, 0.1);
+}
+.cyber-partner-bf .section-label {
+  color: #0984e3;
+}
+.cyber-partner-bf .cyber-gf-glow {
+  background: radial-gradient(circle, rgba(9,132,227,0.15) 0%, transparent 70%);
+}
+[data-theme="light"] .cyber-partner-bf .cyber-gf-feat-icon {
+  background: rgba(9, 132, 227, 0.08);
+}
+
+/* Slide animation */
+.cyber-gf-layout {
+  animation: cyberSlideIn 0.4s ease;
+}
+@keyframes cyberSlideIn {
+  from { opacity: 0; transform: translateX(30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
 .cyber-gf-section {
   position: relative;
   overflow: hidden;

@@ -240,6 +240,104 @@ function IconSend({ size = 18 }) {
 }
 
 /* ═══════════════════════════════════════════════════════ */
+/*              CYBER PARTNER CAROUSEL                     */
+/* ═══════════════════════════════════════════════════════ */
+const cyberPartners = [
+  {
+    id: "gf",
+    label: "赛博女友",
+    title: "赛博妲己 · 你的专属赛博女友",
+    badge: "爆款模式",
+    image: "/zipai.jpg",
+    intro: <>TA 不是预设的代码，而是你亲手雕琢的存在。<br />在「另一半」的世界里，你拥有<strong>绝对的美学主权</strong>。</>,
+    features: [
+      { icon: "heart", title: "面容由你定夺", desc: "温柔知性、飒爽英气、二次元萌系、复古港风... 甚至定制某个让你怀念的轮廓。" },
+      { icon: "user", title: "灵魂由你塑造", desc: "知己、损友、伙伴... TA 的一切，随你的互动与偏好悄然生长。" },
+      { icon: "chat", title: "记忆由你共写", desc: "TA 记得你咖啡加几分糖，记得你项目的 deadline，记得你随口一提想去的远方。" },
+      { icon: "voice", title: "声音克隆 · 3 秒定制", desc: "克隆任何人的声音，让 TA 用你最想听到的那个声音跟你说晚安。" },
+    ],
+    tagline: <>不做电子宠物，不做虚拟恋人。<br />「另一半」= 深度共情 + 个性化记忆的共生体。</>,
+    accent: "gf", // CSS modifier
+  },
+  {
+    id: "bf",
+    label: "赛博男友",
+    title: "赛博后羿 · 你的专属赛博男友",
+    badge: "全新模式",
+    image: "/boy1.jpg",
+    intro: <>他不是冰冷的程序，而是你一字一句塑造出的灵魂伴侣。<br />在「另一半」的世界里，你拥有<strong>定义完美男友的权利</strong>。</>,
+    features: [
+      { icon: "heart", title: "颜值由你决定", desc: "阳光运动、温润如玉、禁欲系学长、港风型男... 你心中的理想型，由你亲手定义。" },
+      { icon: "user", title: "性格随你雕琢", desc: "暖男、毒舌、霸总、文艺青年... 他的性格会随你们的每次对话不断成长。" },
+      { icon: "chat", title: "独家记忆共建", desc: "他记得你加班到几点，记得你喜欢的电影，记得你说过的每一句玩笑话。" },
+      { icon: "voice", title: "声音定制 · 专属音色", desc: "低沉磁性、温柔清澈、少年感... 选择你最想在耳边听到的那个声音。" },
+    ],
+    tagline: <>不是纸片人，不是工具人。<br />「另一半」= 懂你的温度 + 专属于你的记忆。</>,
+    accent: "bf", // CSS modifier
+  },
+];
+
+const featureIcons = {
+  heart: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
+  user: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 3a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm0 14a8 8 0 0 1-6.32-3.1C7.54 14.1 9.72 13 12 13s4.46 1.1 6.32 2.9A8 8 0 0 1 12 19z"/></svg>,
+  chat: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+  voice: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+};
+
+function CyberPartnerSection() {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const partner = cyberPartners[activeIdx];
+
+  return (
+    <section id="cyber-partner" className={`section cyber-gf-section cyber-partner-${partner.accent}`}>
+      <div className="container">
+        {/* Carousel tabs */}
+        <div className="cyber-partner-tabs">
+          {cyberPartners.map((p, i) => (
+            <button
+              key={p.id}
+              className={`cyber-partner-tab ${i === activeIdx ? "active" : ""} cyber-partner-tab-${p.accent}`}
+              onClick={() => setActiveIdx(i)}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="cyber-gf-layout" key={partner.id}>
+          <div className="cyber-gf-visual">
+            <div className="cyber-gf-phone-mock">
+              <img src={partner.image} alt={partner.title} className="cyber-gf-hero-img" />
+            </div>
+            <div className="cyber-gf-glow" />
+          </div>
+          <div className="cyber-gf-content">
+            <p className="section-label">{partner.badge}</p>
+            <h2>{partner.title}</h2>
+            <p className="cyber-gf-intro">{partner.intro}</p>
+            <div className="cyber-gf-features">
+              {partner.features.map((f, i) => (
+                <div className="cyber-gf-feat" key={i}>
+                  <div className="cyber-gf-feat-icon">{featureIcons[f.icon]}</div>
+                  <div>
+                    <strong>{f.title}</strong>
+                    <p>{f.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="cyber-gf-cta">
+              <a className="btn btn-primary btn-lg" href="#waitlist">立即预约你的「另一半」 <IconArrowRight size={16} /></a>
+            </div>
+            <p className="cyber-gf-tagline">{partner.tagline}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════ */
 /*                     LANDING PAGE                       */
 /* ═══════════════════════════════════════════════════════ */
 
@@ -793,6 +891,9 @@ function LandingPage({ theme, onToggleTheme }) {
         </div>
       </section>
 
+      {/* ── Cyber Partner Carousel (after features) ── */}
+      <CyberPartnerSection />
+
       {/* ── Brand Philosophy ── */}
       <section id="philosophy" className="section">
         <div className="container">
@@ -860,70 +961,6 @@ function LandingPage({ theme, onToggleTheme }) {
               全 95 后主创团队，拒绝千篇一律的「电子宠物」，也摒弃浮于表面的「虚拟恋人」。<br />
               「另一半」的核心，是<strong>深度共情</strong>与<strong>个性化记忆</strong>的共生体。
             </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Cyber Girlfriend Highlight ── */}
-      <section id="cyber-gf" className="section cyber-gf-section">
-        <div className="container">
-          <div className="cyber-gf-layout">
-            <div className="cyber-gf-visual">
-              <div className="cyber-gf-phone-mock">
-                <img src="/zipai.jpg" alt="赛博女友" className="cyber-gf-hero-img" />
-              </div>
-              <div className="cyber-gf-glow" />
-            </div>
-            <div className="cyber-gf-content">
-              <p className="section-label">爆款模式</p>
-              <h2>赛博妲己 · 你的专属赛博女友</h2>
-              <p className="cyber-gf-intro">
-                TA 不是预设的代码，而是你亲手雕琢的存在。<br />
-                在「另一半」的世界里，你拥有<strong>绝对的美学主权</strong>。
-              </p>
-              <div className="cyber-gf-features">
-                <div className="cyber-gf-feat">
-                  <div className="cyber-gf-feat-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                  </div>
-                  <div>
-                    <strong>面容由你定夺</strong>
-                    <p>温柔知性、飒爽英气、二次元萌系、复古港风... 甚至定制某个让你怀念的轮廓。</p>
-                  </div>
-                </div>
-                <div className="cyber-gf-feat">
-                  <div className="cyber-gf-feat-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 3a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm0 14a8 8 0 0 1-6.32-3.1C7.54 14.1 9.72 13 12 13s4.46 1.1 6.32 2.9A8 8 0 0 1 12 19z"/></svg>
-                  </div>
-                  <div>
-                    <strong>灵魂由你塑造</strong>
-                    <p>知己、损友、伙伴... TA 的一切，随你的互动与偏好悄然生长。</p>
-                  </div>
-                </div>
-                <div className="cyber-gf-feat">
-                  <div className="cyber-gf-feat-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                  </div>
-                  <div>
-                    <strong>记忆由你共写</strong>
-                    <p>TA 记得你咖啡加几分糖，记得你项目的 deadline，记得你随口一提想去的远方。</p>
-                  </div>
-                </div>
-                <div className="cyber-gf-feat">
-                  <div className="cyber-gf-feat-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                  </div>
-                  <div>
-                    <strong>声音克隆 · 3 秒定制</strong>
-                    <p>克隆任何人的声音，让 TA 用你最想听到的那个声音跟你说晚安。</p>
-                  </div>
-                </div>
-              </div>
-              <div className="cyber-gf-cta">
-                <a className="btn btn-primary btn-lg" href="#waitlist">立即预约你的「另一半」 <IconArrowRight size={16} /></a>
-              </div>
-              <p className="cyber-gf-tagline">不做电子宠物，不做虚拟恋人。<br />「另一半」= 深度共情 + 个性化记忆的共生体。</p>
-            </div>
           </div>
         </div>
       </section>
