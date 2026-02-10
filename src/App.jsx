@@ -264,7 +264,7 @@ const cyberPartners = [
     label: "赛博男友",
     title: "赛博后羿 · 你的专属赛博男友",
     badge: "全新模式",
-    image: "/boy1.jpg",
+    image: "/zipaiboy.png",
     intro: <>他不是冰冷的程序，而是你一字一句塑造出的灵魂伴侣。<br />在「另一半」的世界里，你拥有<strong>定义完美男友的权利</strong>。</>,
     features: [
       { icon: "heart", title: "颜值由你决定", desc: "阳光运动、温润如玉、禁欲系学长、港风型男... 你心中的理想型，由你亲手定义。" },
@@ -726,6 +726,9 @@ function LandingPage({ theme, onToggleTheme }) {
         </div>
       </section>
 
+      {/* ── Cyber Partner Carousel ── */}
+      <CyberPartnerSection />
+
       {/* ── Voice Showcase (WeChat style) ── */}
       <section id="voice-showcase" className="section section-alt">
         <div className="container">
@@ -890,9 +893,6 @@ function LandingPage({ theme, onToggleTheme }) {
           </div>
         </div>
       </section>
-
-      {/* ── Cyber Partner Carousel (after features) ── */}
-      <CyberPartnerSection />
 
       {/* ── Brand Philosophy ── */}
       <section id="philosophy" className="section">
