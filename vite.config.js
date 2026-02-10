@@ -8,6 +8,8 @@ function createDashScopeTtsProxy(env) {
   const apiKey = env.DASHSCOPE_API_KEY || "";
   const model = env.DASHSCOPE_TTS_MODEL || "qwen3-tts-flash";
 
+  console.log(`[TTS Proxy Init] apiKey=${apiKey ? "SET(" + apiKey.slice(0, 6) + "...)" : "MISSING"}, model=${model}`);
+
   const handler = async (req, res) => {
     if (!req.url || !req.url.startsWith("/api/tts")) {
       return false;
@@ -21,6 +23,7 @@ function createDashScopeTtsProxy(env) {
     }
 
     if (!apiKey) {
+      console.error("[TTS Proxy] API key is missing! Check .env.local");
       res.statusCode = 500;
       res.setHeader("Content-Type", "application/json");
       res.end(JSON.stringify({ error: "server_missing_api_key" }));
@@ -78,6 +81,7 @@ function createDashScopeTtsProxy(env) {
       }
 
       if (!response.ok) {
+        console.error(`[TTS Proxy] DashScope returned ${response.status}:`, JSON.stringify(data));
         res.statusCode = response.status;
         res.setHeader("Content-Type", "application/json");
         res.end(
@@ -89,19 +93,41 @@ function createDashScopeTtsProxy(env) {
         return true;
       }
 
-      const url = data?.output?.audio?.url;
-      if (!url) {
+      const audioUrl = data?.output?.audio?.url;
+      if (!audioUrl) {
         res.statusCode = 502;
         res.setHeader("Content-Type", "application/json");
         res.end(JSON.stringify({ error: "missing_audio_url", detail: data }));
         return true;
       }
 
-      res.statusCode = 200;
-      res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify({ url }));
+      // Proxy the audio through our server to avoid Mixed Content issues
+      // when accessed via HTTPS (e.g. https://www.ta24h.com)
+      try {
+        const audioResp = await fetch(audioUrl);
+        if (!audioResp.ok) {
+          // Fallback: return the URL directly
+          res.statusCode = 200;
+          res.setHeader("Content-Type", "application/json");
+          res.end(JSON.stringify({ url: audioUrl }));
+          return true;
+        }
+        const audioBuffer = Buffer.from(await audioResp.arrayBuffer());
+        const base64 = audioBuffer.toString("base64");
+        const contentType = audioResp.headers.get("content-type") || "audio/mpeg";
+        const dataUri = `data:${contentType};base64,${base64}`;
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ url: dataUri }));
+      } catch (audioErr) {
+        console.error("[TTS Proxy] Audio download failed, returning raw URL:", audioErr.message);
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ url: audioUrl }));
+      }
       return true;
     } catch (error) {
+      console.error("[TTS Proxy Error]", error);
       res.statusCode = 500;
       res.setHeader("Content-Type", "application/json");
       res.end(
