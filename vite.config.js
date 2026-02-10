@@ -11,6 +11,15 @@ function createDashScopeTtsProxy(env) {
   console.log(`[TTS Proxy Init] apiKey=${apiKey ? "SET(" + apiKey.slice(0, 6) + "...)" : "MISSING"}, model=${model}`);
 
   const handler = async (req, res) => {
+    // GET /api/tts-config — return config for direct frontend calls
+    if (req.url === "/api/tts-config" && req.method === "GET") {
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("Cache-Control", "no-store");
+      res.end(JSON.stringify({ endpoint, apiKey, model }));
+      return true;
+    }
+
     if (!req.url || !req.url.startsWith("/api/tts")) {
       return false;
     }
