@@ -464,8 +464,7 @@ function LandingPage({ theme, onToggleTheme }) {
           <nav className="nav-links">
             <a href="#spring-mode">春节模式</a>
             <a href="#voice-showcase">语音演示</a>
-            <a href="#features">春节功能</a>
-            <a href="#waitlist">预约</a>
+            <a href="#features">春节提供</a>
             <ThemeToggle theme={theme} onToggle={onToggleTheme} />
             <a className="btn btn-primary nav-cta" href="#waitlist">立即预约 <IconArrowRight size={14} /></a>
           </nav>
@@ -505,7 +504,7 @@ function LandingPage({ theme, onToggleTheme }) {
               </div>
               <div className="iphone-wx-title">
                 <svg width="10" height="18" viewBox="0 0 10 18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="8 16 2 9 8 2"/></svg>
-                <span>ALEX · {heroScene.label}</span>
+                <span>{heroScene.label}</span>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
               </div>
               <div className="iphone-chat" key={heroSceneIdx}>
