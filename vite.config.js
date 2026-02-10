@@ -248,5 +248,13 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   return {
     plugins: [react(), createDashScopeTtsProxy(env), createReservationApi()],
+    server: {
+      port: 8800,
+      strictPort: true,
+    },
+    preview: {
+      port: 8800,
+      strictPort: true,
+    },
   };
 });
