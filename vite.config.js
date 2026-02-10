@@ -198,31 +198,50 @@ function createReservationApi() {
   }
 
   const handler = async (req, res) => {
-    // GET /api/reservations — return count + list
-    if (req.url === "/api/reservations" && req.method === "GET") {
+    const parsedUrl = new URL(req.url, "http://localhost");
+    const pathname = parsedUrl.pathname;
+
+    // GET /api/reservations — return count + list (with optional password)
+    if (pathname === "/api/reservations") {
+      const pw = parsedUrl.searchParams.get("pw") || "";
       const list = readAll();
-      res.statusCode = 200;
-      res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify({ count: list.length, data: list }));
+      // Without password, only return count
+      if (pw === "xhsk") {
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ count: list.length, data: list }));
+      } else {
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ count: list.length }));
+      }
       return true;
     }
 
-    // POST /api/reserve — create reservation
-    if (req.url === "/api/reserve" && req.method === "POST") {
-      const chunks = [];
-      for await (const chunk of req) chunks.push(chunk);
+    // GET|POST /api/reserve — create reservation
+    if (pathname === "/api/reserve") {
+      let contact = "";
+      let referrer = "";
 
-      let payload;
-      try {
-        payload = JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}");
-      } catch {
-        res.statusCode = 400;
-        res.setHeader("Content-Type", "application/json");
-        res.end(JSON.stringify({ error: "invalid_json" }));
-        return true;
+      if (req.method === "GET") {
+        contact = String(parsedUrl.searchParams.get("contact") || "").trim();
+        referrer = String(parsedUrl.searchParams.get("referrer") || "").trim();
+      } else if (req.method === "POST") {
+        const chunks = [];
+        for await (const chunk of req) chunks.push(chunk);
+        let payload;
+        try {
+          payload = JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}");
+        } catch {
+          res.statusCode = 400;
+          res.setHeader("Content-Type", "application/json");
+          res.end(JSON.stringify({ error: "invalid_json" }));
+          return true;
+        }
+        contact = String(payload?.contact || "").trim();
+        referrer = String(payload?.referrer || "").trim();
       }
 
-      const contact = String(payload?.contact || "").trim();
       if (!contact) {
         res.statusCode = 400;
         res.setHeader("Content-Type", "application/json");
@@ -242,7 +261,7 @@ function createReservationApi() {
 
       const entry = {
         contact,
-        referrer: String(payload?.referrer || "").trim() || null,
+        referrer: referrer || null,
         created_at: new Date().toISOString(),
         ip: req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "",
         ua: req.headers["user-agent"] || "",

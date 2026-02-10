@@ -278,11 +278,9 @@ function LandingPage({ theme, onToggleTheme }) {
     setReserveLoading(true);
     setReserveError("");
     try {
-      const res = await fetch("/api/reserve", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contact, referrer: new URLSearchParams(window.location.search).get("ref") || "" }),
-      });
+      const referrer = new URLSearchParams(window.location.search).get("ref") || "";
+      const params = new URLSearchParams({ contact, referrer });
+      const res = await fetch(`/api/reserve?${params.toString()}`);
       const data = await res.json();
       if (data?.success) {
         setReserved(true);
@@ -1233,7 +1231,153 @@ function ThemeToggle({ theme, onToggle }) {
   );
 }
 
+/* ═══════════════════════════════════════════════════════ */
+/*                   DASHBOARD PAGE                       */
+/* ═══════════════════════════════════════════════════════ */
+function DashboardPage({ theme, onToggleTheme }) {
+  const [authed, setAuthed] = useState(false);
+  const [pwInput, setPwInput] = useState("");
+  const [pwError, setPwError] = useState("");
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const PASSWORD = "xhsk";
+
+  function handleLogin(e) {
+    e.preventDefault();
+    if (pwInput === PASSWORD) {
+      setAuthed(true);
+      setPwError("");
+    } else {
+      setPwError("口令错误");
+    }
+  }
+
+  useEffect(() => {
+    if (!authed) return;
+    setLoading(true);
+    fetch(`/api/reservations?pw=${PASSWORD}`)
+      .then((r) => r.json())
+      .then((d) => { setData(d?.data || []); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [authed]);
+
+  const filtered = searchTerm
+    ? data.filter((r) =>
+        r.contact?.includes(searchTerm) ||
+        r.referrer?.includes(searchTerm) ||
+        r.ip?.includes(searchTerm)
+      )
+    : data;
+
+  if (!authed) {
+    return (
+      <div className="dash-page" data-theme={theme}>
+        <div className="dash-login-wrap">
+          <div className="dash-login-card">
+            <h1 className="dash-login-title">Dashboard</h1>
+            <p className="dash-login-sub">请输入管理口令</p>
+            <form onSubmit={handleLogin} className="dash-login-form">
+              <input
+                type="password"
+                className="dash-login-input"
+                placeholder="口令"
+                value={pwInput}
+                onChange={(e) => setPwInput(e.target.value)}
+                autoFocus
+              />
+              <button type="submit" className="btn btn-primary dash-login-btn">进入</button>
+            </form>
+            {pwError && <p className="dash-login-error">{pwError}</p>}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="dash-page" data-theme={theme}>
+      <header className="dash-header">
+        <div className="dash-header-inner">
+          <h1 className="dash-title">预约管理 Dashboard</h1>
+          <div className="dash-header-actions">
+            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+            <a href="/" className="btn btn-ghost dash-back-btn">返回首页</a>
+          </div>
+        </div>
+      </header>
+      <main className="dash-main">
+        {/* Stats */}
+        <div className="dash-stats">
+          <div className="dash-stat-card">
+            <span className="dash-stat-num">{data.length}</span>
+            <span className="dash-stat-label">总预约人数</span>
+          </div>
+          <div className="dash-stat-card">
+            <span className="dash-stat-num">{data.filter((r) => r.referrer).length}</span>
+            <span className="dash-stat-label">通过邀请预约</span>
+          </div>
+          <div className="dash-stat-card">
+            <span className="dash-stat-num">{data.length > 0 ? new Date(data[data.length - 1].created_at).toLocaleDateString("zh-CN") : "-"}</span>
+            <span className="dash-stat-label">最近预约时间</span>
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="dash-toolbar">
+          <input
+            type="text"
+            className="dash-search"
+            placeholder="搜索联系方式、来源、IP..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <span className="dash-result-count">
+            {searchTerm ? `${filtered.length} / ${data.length} 条` : `共 ${data.length} 条`}
+          </span>
+        </div>
+
+        {/* Table */}
+        {loading ? (
+          <p className="dash-loading">加载中...</p>
+        ) : data.length === 0 ? (
+          <p className="dash-empty">暂无预约数据</p>
+        ) : (
+          <div className="dash-table-wrap">
+            <table className="dash-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>联系方式</th>
+                  <th>来源</th>
+                  <th>预约时间</th>
+                  <th>IP</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((r, i) => (
+                  <tr key={i}>
+                    <td>{i + 1}</td>
+                    <td className="dash-cell-contact">{r.contact}</td>
+                    <td>{r.referrer || <span className="dash-muted">直接访问</span>}</td>
+                    <td>{new Date(r.created_at).toLocaleString("zh-CN")}</td>
+                    <td className="dash-cell-ip">{r.ip}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+
 export default function App() {
   const { theme, toggle } = useTheme();
+  const isDashboard = window.location.pathname.startsWith("/dashboard");
+  if (isDashboard) return <DashboardPage theme={theme} onToggleTheme={toggle} />;
   return <LandingPage theme={theme} onToggleTheme={toggle} />;
 }
