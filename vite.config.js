@@ -11,24 +11,10 @@ function createDashScopeTtsProxy(env) {
   console.log(`[TTS Proxy Init] apiKey=${apiKey ? "SET(" + apiKey.slice(0, 6) + "...)" : "MISSING"}, model=${model}`);
 
   const handler = async (req, res) => {
-    // GET /api/tts-config — return config for direct frontend calls
-    if (req.url === "/api/tts-config" && req.method === "GET") {
-      res.statusCode = 200;
-      res.setHeader("Content-Type", "application/json");
-      res.setHeader("Cache-Control", "no-store");
-      res.end(JSON.stringify({ endpoint, apiKey, model }));
-      return true;
-    }
+    const parsedUrl = new URL(req.url, "http://localhost");
 
-    if (!req.url || !req.url.startsWith("/api/tts")) {
+    if (!parsedUrl.pathname.startsWith("/api/tts")) {
       return false;
-    }
-
-    if (req.method !== "POST") {
-      res.statusCode = 405;
-      res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify({ error: "method_not_allowed" }));
-      return true;
     }
 
     if (!apiKey) {
@@ -39,23 +25,35 @@ function createDashScopeTtsProxy(env) {
       return true;
     }
 
-    const chunks = [];
-    for await (const chunk of req) {
-      chunks.push(chunk);
-    }
+    let text = "";
+    let voice = "Cherry";
 
-    let payload;
-    try {
-      payload = JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}");
-    } catch {
-      res.statusCode = 400;
+    if (req.method === "GET") {
+      // GET /api/tts?text=xxx&voice=yyy — works through reverse proxies
+      text = String(parsedUrl.searchParams.get("text") || "").trim();
+      voice = String(parsedUrl.searchParams.get("voice") || "Cherry").trim();
+    } else if (req.method === "POST") {
+      const chunks = [];
+      for await (const chunk of req) {
+        chunks.push(chunk);
+      }
+      let payload;
+      try {
+        payload = JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}");
+      } catch {
+        res.statusCode = 400;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ error: "invalid_json" }));
+        return true;
+      }
+      text = String(payload?.text || "").trim();
+      voice = String(payload?.voice || "Cherry").trim() || "Cherry";
+    } else {
+      res.statusCode = 405;
       res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify({ error: "invalid_json" }));
+      res.end(JSON.stringify({ error: "method_not_allowed" }));
       return true;
     }
-
-    const text = String(payload?.text || "").trim();
-    const voice = String(payload?.voice || "Cherry").trim() || "Cherry";
     console.log(`[TTS Proxy] voice="${voice}", text="${text.slice(0, 30)}..."`);
     if (!text) {
       res.statusCode = 400;

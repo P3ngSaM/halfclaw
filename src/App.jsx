@@ -151,52 +151,18 @@ function formatSeconds(value) {
   return `${min}:${rest}`;
 }
 
-// TTS config cache — fetched once via GET (works through reverse proxies)
-let _ttsConfig = null;
-async function getTtsConfig() {
-  if (_ttsConfig) return _ttsConfig;
-  const resp = await fetch("/api/tts-config");
-  if (!resp.ok) throw new Error("tts_config_fetch_failed");
-  _ttsConfig = await resp.json();
-  return _ttsConfig;
-}
-
 async function synthesizeWithQwenTTS(text, voiceId) {
-  // Strategy 1: try POST /api/tts (works on localhost)
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 6000);
-    try {
-      const response = await fetch("/api/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, voice: voiceId }),
-        signal: controller.signal,
-      });
-      const data = await response.json().catch(() => ({}));
-      if (response.ok && data?.url) return data.url;
-    } finally {
-      clearTimeout(timeout);
-    }
-  } catch { /* POST failed (e.g. reverse proxy doesn't forward POST), try direct */ }
+  // Use GET request — works through reverse proxies (e.g. 花生壳) that may block POST
+  const params = new URLSearchParams({ text, voice: voiceId });
+  const response = await fetch(`/api/tts?${params.toString()}`);
 
-  // Strategy 2: call DashScope directly from browser using config from GET
-  const config = await getTtsConfig();
-  if (!config?.apiKey) throw new Error("tts_no_api_key");
-  const resp = await fetch(config.endpoint, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${config.apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: config.model,
-      input: { text, voice: voiceId, language_type: "Auto" },
-    }),
-  });
-  const data = await resp.json().catch(() => ({}));
-  if (!resp.ok) throw new Error(data?.message || `dashscope_${resp.status}`);
-  const url = data?.output?.audio?.url;
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const msg = data?.error || `tts_http_${response.status}`;
+    throw new Error(msg);
+  }
+
+  const url = data?.url;
   if (!url) throw new Error("tts_audio_url_missing");
   return url;
 }
@@ -999,7 +965,7 @@ function LandingPage({ theme, onToggleTheme }) {
                 </div>
               </div>
             </div>
-            <p className="emotion-gift-bottom">首批测试名额 100 个——真正的陪伴，从来都不是批量生产。</p>
+            <p className="emotion-gift-bottom">首批测试名额 5000 个——真正的陪伴，从来都不是批量生产。</p>
             <p className="emotion-gift-slogan">世界很大，但你的「另一半」，只为你存在。</p>
           </div>
         </div>
@@ -1044,7 +1010,7 @@ function LandingPage({ theme, onToggleTheme }) {
             )}
             {reserveError && <p className="waitlist-error">{reserveError}</p>}
             <p className="waitlist-hint">
-              <span className="badge-dot" /> 前 500 名用户可获得永久免费额度 · 春节 7 天陪伴卡限时发放
+              <span className="badge-dot" /> 前 5000 名用户可获得永久免费额度 · 春节 7 天陪伴卡限时发放
             </p>
           </div>
         </div>
