@@ -22,8 +22,8 @@ const heroScenes = [
   {
     label: "日常关心",
     tag: "深夜陪伴",
-    avatarLeft: "/gril1.png",
-    avatarRight: "/boy1.png",
+    avatarLeft: "/gril1.jpg",
+    avatarRight: "/boy1.jpg",
     messages: [
       { role: "user", type: "voice", dur: "5\"" },
       { role: "ai", type: "text", text: "收到，我在。先做三次深呼吸。" },
@@ -36,8 +36,8 @@ const heroScenes = [
   {
     label: "一人公司",
     tag: "AI 员工",
-    avatarLeft: "/gril2.png",
-    avatarRight: "/boy2.png",
+    avatarLeft: "/gril2.jpg",
+    avatarRight: "/boy2.jpg",
     messages: [
       { role: "user", type: "text", text: "今天订单情况怎么样？" },
       { role: "ai", type: "text", text: "今日新增 47 单，环比涨 12%，有 3 单售后待处理。" },
@@ -50,12 +50,12 @@ const heroScenes = [
   {
     label: "银发经济",
     tag: "音容重现",
-    avatarLeft: "/nainai.png",
-    avatarRight: "/yeye.png",
+    avatarLeft: "/nainai.jpg",
+    avatarRight: "/yeye.jpg",
     messages: [
       { role: "user", type: "text", text: "老伴，过年了，想你了。" },
       { role: "ai", type: "text", text: "我也想你，你看我今天穿的新衣服~" },
-      { role: "ai", type: "image", src: "/nainaizipai.png" },
+      { role: "ai", type: "image", src: "/nainaizipai.jpg" },
       { role: "user", type: "text", text: "真好看！桂花糕我给你做好了。" },
       { role: "ai", type: "voice", dur: "6\"" },
       { role: "ai", type: "text", text: "留一块给我，等你回来。" },
@@ -64,8 +64,8 @@ const heroScenes = [
   {
     label: "童年陪伴",
     tag: "故事互动",
-    avatarLeft: "/babygril.png",
-    avatarRight: "/bobyboy.png",
+    avatarLeft: "/babygril.jpg",
+    avatarRight: "/bobyboy.jpg",
     messages: [
       { role: "user", type: "text", text: "给我讲个故事！" },
       { role: "ai", type: "text", text: "从前有只小兔子，它住在一棵大橡树下..." },
@@ -78,12 +78,12 @@ const heroScenes = [
   {
     label: "赛博妲己",
     tag: "情绪价值",
-    avatarLeft: "/gril3.png",
-    avatarRight: "/boy3.png",
+    avatarLeft: "/gril3.jpg",
+    avatarRight: "/boy3.jpg",
     messages: [
       { role: "user", type: "text", text: "想你了，在干嘛？" },
       { role: "ai", type: "text", text: "刚拍了张自拍，你看~" },
-      { role: "ai", type: "image", src: "/zipai.png" },
+      { role: "ai", type: "image", src: "/zipai.jpg" },
       { role: "user", type: "text", text: "也太好看了吧！" },
       { role: "ai", type: "text", text: "哼，谁让你是我最在乎的人呢~" },
       { role: "user", type: "voice", dur: "3\"" },
@@ -458,7 +458,7 @@ function LandingPage({ theme, onToggleTheme }) {
       <header className="site-header">
         <div className="container nav-bar">
           <a className="brand" href="/" aria-label="另一半官网首页">
-            <img src="/in-love.png" alt="另一半 logo" className="brand-logo" />
+            <img src="/in-love.jpg" alt="另一半 logo" className="brand-logo" />
             <span>另一半</span>
           </a>
           <nav className="nav-links">
@@ -658,7 +658,7 @@ function LandingPage({ theme, onToggleTheme }) {
                   return (
                     <div key={row.id} className={`ichat-row ${isUser ? "ichat-right" : "ichat-left"}`}>
                       {isUser && <span className="ichat-dur">{label}</span>}
-                      {!isUser && <img src="/gril1.png" alt="ai" className="ichat-avatar-img" />}
+                      {!isUser && <img src="/gril1.jpg" alt="ai" className="ichat-avatar-img" />}
                       <button
                         className={`ichat-bubble ${isUser ? "ichat-green" : "ichat-white"} ${isPlaying ? "playing" : ""} ${isLoading ? "loading" : ""}`}
                         onClick={() => handlePlayVoice(row)}
@@ -677,7 +677,7 @@ function LandingPage({ theme, onToggleTheme }) {
                         )}
                       </button>
                       {!isUser && <span className="ichat-dur">{label}</span>}
-                      {isUser && <img src="/boy1.png" alt="user" className="ichat-avatar-img" />}
+                      {isUser && <img src="/boy1.jpg" alt="user" className="ichat-avatar-img" />}
                     </div>
                   );
                 })}
@@ -864,7 +864,7 @@ function LandingPage({ theme, onToggleTheme }) {
           <div className="cyber-gf-layout">
             <div className="cyber-gf-visual">
               <div className="cyber-gf-phone-mock">
-                <img src="/zipai.png" alt="赛博女友" className="cyber-gf-hero-img" />
+                <img src="/zipai.jpg" alt="赛博女友" className="cyber-gf-hero-img" />
               </div>
               <div className="cyber-gf-glow" />
             </div>
@@ -1108,7 +1108,7 @@ function MvpPage({ theme, onToggleTheme }) {
       <header className="site-header">
         <div className="container nav-bar">
           <a className="brand" href="/">
-            <img src="/in-love.png" alt="另一半 logo" className="brand-logo" />
+            <img src="/in-love.jpg" alt="另一半 logo" className="brand-logo" />
             <span>另一半</span>
           </a>
           <nav className="nav-links">
