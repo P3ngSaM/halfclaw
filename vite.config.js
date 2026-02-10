@@ -251,10 +251,16 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 8800,
       strictPort: true,
+      host: "0.0.0.0",
+      allowedHosts: ["127.0.0.1", "localhost", "www.ta24h.com", "ta24h.com"],
+      cors: true,
     },
     preview: {
       port: 8800,
       strictPort: true,
+      host: "0.0.0.0",
+      allowedHosts: ["127.0.0.1", "localhost", "www.ta24h.com", "ta24h.com"],
+      cors: true,
     },
   };
 });
