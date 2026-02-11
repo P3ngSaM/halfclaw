@@ -306,6 +306,14 @@ export default defineConfig(({ mode }) => {
       host: "0.0.0.0",
       allowedHosts: ["127.0.0.1", "localhost", "www.ta24h.com", "ta24h.com"],
       cors: true,
+      proxy: {
+        "/gateway": {
+          target: "ws://127.0.0.1:18789",
+          ws: true,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/gateway/, ""),
+        },
+      },
     },
     preview: {
       port: 8800,

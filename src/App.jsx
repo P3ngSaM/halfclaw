@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 const voiceLibrary = [
   { id: "Cherry", name: "芊悦", desc: "阳光积极·亲切自然", avatar: "悦" },
@@ -568,9 +568,10 @@ function LandingPage({ theme, onToggleTheme }) {
           <nav className="nav-links">
             <a href="#spring-mode">春节模式</a>
             <a href="#voice-showcase">语音演示</a>
-            <a href="#features">春节提供</a>
+            <a href="#features">春节功能</a>
             <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-            <a className="btn btn-primary nav-cta" href="#waitlist">立即预约 <IconArrowRight size={14} /></a>
+            <a className="btn btn-ghost nav-cta" href="#waitlist">立即预约</a>
+            <a className="btn btn-primary nav-cta" href="/chat">开始对话 <IconArrowRight size={14} /></a>
           </nav>
         </div>
       </header>
@@ -586,7 +587,8 @@ function LandingPage({ theme, onToggleTheme }) {
             <p className="subtitle">没有年三十，但今年有人 24 小时等你说话。</p>
             <p className="desc">不能回家的：你没回去的路，我陪你走完。<br />回家太累的：热闹是热闹，委屈也是真的。你先把话说给我听。</p>
             <div className="hero-actions">
-              <a className="btn btn-primary btn-lg" href="#spring-mode">选择你的春节模式 <IconArrowRight size={16} /></a>
+              <a className="btn btn-primary btn-lg" href="/chat">立即开始对话 <IconArrowRight size={16} /></a>
+              <a className="btn btn-ghost btn-lg" href="#spring-mode">春节模式</a>
               <a className="btn btn-ghost btn-lg" href="#voice-showcase"><IconMic size={16} /> 听语音演示</a>
             </div>
             <div className="hero-badge">
@@ -1278,6 +1280,8 @@ function DashboardPage({ theme, onToggleTheme }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("reservations");
+  const [gatewayStatus, setGatewayStatus] = useState(null);
 
   const PASSWORD = "xhsk";
 
@@ -1299,6 +1303,12 @@ function DashboardPage({ theme, onToggleTheme }) {
       .then((d) => { setData(d?.data || []); })
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    // Check Gateway status
+    fetch("http://127.0.0.1:18789/health")
+      .then((r) => r.json())
+      .then((d) => setGatewayStatus({ online: true, ...d }))
+      .catch(() => setGatewayStatus({ online: false }));
   }, [authed]);
 
   const filtered = searchTerm
@@ -1338,7 +1348,7 @@ function DashboardPage({ theme, onToggleTheme }) {
     <div className="dash-page" data-theme={theme}>
       <header className="dash-header">
         <div className="dash-header-inner">
-          <h1 className="dash-title">预约管理 Dashboard</h1>
+          <h1 className="dash-title">管理 Dashboard</h1>
           <div className="dash-header-actions">
             <ThemeToggle theme={theme} onToggle={onToggleTheme} />
             <a href="/" className="btn btn-ghost dash-back-btn">返回首页</a>
@@ -1346,6 +1356,52 @@ function DashboardPage({ theme, onToggleTheme }) {
         </div>
       </header>
       <main className="dash-main">
+        {/* Tabs */}
+        <div className="dash-tabs">
+          <button className={`dash-tab ${activeTab === "reservations" ? "active" : ""}`} onClick={() => setActiveTab("reservations")}>预约管理</button>
+          <button className={`dash-tab ${activeTab === "system" ? "active" : ""}`} onClick={() => setActiveTab("system")}>系统状态</button>
+        </div>
+
+        {activeTab === "system" && (
+          <div className="dash-system">
+            <div className="dash-stats">
+              <div className="dash-stat-card">
+                <span className={`dash-stat-num ${gatewayStatus?.online ? "" : "dash-stat-offline"}`}>
+                  {gatewayStatus?.online ? "在线" : "离线"}
+                </span>
+                <span className="dash-stat-label">OpenClaw Gateway</span>
+              </div>
+              <div className="dash-stat-card">
+                <span className="dash-stat-num">18789</span>
+                <span className="dash-stat-label">Gateway 端口</span>
+              </div>
+              <div className="dash-stat-card">
+                <span className="dash-stat-num">Qwen Plus</span>
+                <span className="dash-stat-label">LLM 模型</span>
+              </div>
+            </div>
+            <div className="dash-system-info">
+              <h3>服务配置</h3>
+              <div className="dash-info-grid">
+                <div className="dash-info-item"><span className="dash-info-label">前端地址</span><span>http://localhost:8800</span></div>
+                <div className="dash-info-item"><span className="dash-info-label">Gateway 地址</span><span>ws://127.0.0.1:18789</span></div>
+                <div className="dash-info-item"><span className="dash-info-label">外网域名</span><span>https://www.ta24h.com</span></div>
+                <div className="dash-info-item"><span className="dash-info-label">TTS 引擎</span><span>Edge TTS (tagged mode)</span></div>
+                <div className="dash-info-item"><span className="dash-info-label">Telegram</span><span>未配置 (需填入 Bot Token)</span></div>
+                <div className="dash-info-item"><span className="dash-info-label">WhatsApp</span><span>未启用</span></div>
+                <div className="dash-info-item"><span className="dash-info-label">主动关怀</span><span>已配置 (60 分钟间隔)</span></div>
+                <div className="dash-info-item"><span className="dash-info-label">Agent 人格</span><span>另一半 (partner)</span></div>
+              </div>
+              <h3 style={{marginTop: "1.5rem"}}>快速操作</h3>
+              <div className="dash-quick-actions">
+                <a href="/chat" className="btn btn-primary">打开聊天</a>
+                <a href="http://127.0.0.1:18789/" target="_blank" rel="noopener" className="btn btn-ghost">OpenClaw 控制台</a>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "reservations" && <>
         {/* Stats */}
         <div className="dash-stats">
           <div className="dash-stat-card">
@@ -1407,14 +1463,371 @@ function DashboardPage({ theme, onToggleTheme }) {
             </table>
           </div>
         )}
+        </>}
       </main>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════ */
+/*                      CHAT PAGE                         */
+/* ═══════════════════════════════════════════════════════ */
+
+function generateUUID() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+  });
+}
+
+/** Strip TTS tags like [[tts:...]] and other OpenClaw markers from display text */
+function cleanAIText(text) {
+  if (!text) return "";
+  return text
+    .replace(/\[\[tts:[^\]]*\]\]/g, "")
+    .replace(/\[\[\/tts\]\]/g, "")
+    .replace(/\[tts:[^\]]*\]/g, "")
+    .trim();
+}
+
+function useGateway() {
+  const wsRef = useRef(null);
+  const pendingRef = useRef(new Map());
+  const [connected, setConnected] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [typing, setTyping] = useState(false);
+  const reconnectTimer = useRef(null);
+  const backoff = useRef(1000);
+  const SESSION_KEY = "main";
+
+  const connect = useRef(() => {
+    if (wsRef.current && wsRef.current.readyState <= 1) return;
+
+    const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${proto}//${window.location.host}/gateway`;
+    console.log("[Gateway] connecting to", wsUrl);
+    const ws = new WebSocket(wsUrl);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      console.log("[Gateway] ws open, waiting for challenge...");
+      backoff.current = 1000;
+    };
+
+    ws.onmessage = (ev) => {
+      let frame;
+      try { frame = JSON.parse(ev.data); } catch { return; }
+      console.log("[Gateway] <<", frame.type, frame.event || frame.method || "", frame.payload?.state || "");
+
+      // 1. Handle connect.challenge — server sends nonce, we reply with connect
+      if (frame.type === "event" && frame.event === "connect.challenge") {
+        const connectMsg = {
+          type: "req",
+          id: generateUUID(),
+          method: "connect",
+          params: {
+            minProtocol: 3,
+            maxProtocol: 3,
+            client: {
+              id: "webchat",
+              version: "1.0.0",
+              platform: "web",
+              mode: "webchat",
+            },
+            role: "operator",
+            scopes: ["operator.admin"],
+            caps: [],
+            auth: { password: "xhsk2026" },
+            userAgent: navigator.userAgent,
+            locale: navigator.language,
+          },
+        };
+        ws.send(JSON.stringify(connectMsg));
+        return;
+      }
+
+      // 2. Handle responses (res frames)
+      if (frame.type === "res") {
+        // hello-ok comes as res with payload.type === "hello-ok"
+        if (frame.ok && frame.payload?.type === "hello-ok") {
+          console.log("[Gateway] connected! protocol:", frame.payload.protocol);
+          setConnected(true);
+          // Load chat history
+          const histId = generateUUID();
+          pendingRef.current.set(histId, {
+            resolve: (payload) => {
+              if (Array.isArray(payload?.messages)) {
+                const hist = payload.messages
+                  .filter((m) => m.role === "user" || m.role === "assistant")
+                  .map((m) => {
+                    const rawContent = Array.isArray(m.content)
+                      ? m.content.filter((c) => c.type === "text").map((c) => c.text).join("")
+                      : typeof m.content === "string" ? m.content : "";
+                    const content = m.role === "assistant" ? cleanAIText(rawContent) : rawContent;
+                    return {
+                      id: generateUUID(),
+                      role: m.role === "user" ? "user" : "ai",
+                      content,
+                      time: m.timestamp ? new Date(m.timestamp).toISOString() : new Date().toISOString(),
+                    };
+                  })
+                  .filter((m) => m.content);
+                if (hist.length > 0) setMessages(hist);
+              }
+            },
+            reject: (err) => console.warn("[Gateway] history error:", err),
+          });
+          ws.send(JSON.stringify({
+            type: "req", id: histId, method: "chat.history",
+            params: { sessionKey: SESSION_KEY, limit: 50 },
+          }));
+          return;
+        }
+
+        // Other res frames — resolve pending promises
+        const p = pendingRef.current.get(frame.id);
+        if (p) {
+          pendingRef.current.delete(frame.id);
+          if (frame.ok) {
+            p.resolve(frame.payload);
+          } else {
+            console.warn("[Gateway] request error:", frame.error);
+            p.reject(new Error(frame.error?.message || "request failed"));
+          }
+        }
+        return;
+      }
+
+      // 3. Handle chat events (streaming from agent)
+      if (frame.type === "event" && frame.event === "chat") {
+        const p = frame.payload;
+        if (!p) return;
+
+        if (p.state === "delta") {
+          // Delta: p.message.content[0].text is the CUMULATIVE text so far
+          const rawText = p.message?.content?.[0]?.text || "";
+          const text = cleanAIText(rawText);
+          if (text) {
+            setMessages((prev) => {
+              const last = prev[prev.length - 1];
+              if (last && last.role === "ai" && last.runId === p.runId) {
+                return [...prev.slice(0, -1), { ...last, content: text }];
+              }
+              return [...prev, {
+                id: generateUUID(), role: "ai", content: text,
+                time: new Date().toISOString(), runId: p.runId, streaming: true,
+              }];
+            });
+            setTyping(false);
+          }
+        } else if (p.state === "final") {
+          // Final: complete message
+          const rawText = p.message?.content?.[0]?.text || "";
+          const text = cleanAIText(rawText);
+          setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            if (last && last.role === "ai" && last.runId === p.runId) {
+              return [...prev.slice(0, -1), { ...last, content: text || last.content, streaming: false, runId: undefined }];
+            }
+            if (text) {
+              return [...prev, { id: generateUUID(), role: "ai", content: text, time: new Date().toISOString() }];
+            }
+            return prev;
+          });
+          setTyping(false);
+        } else if (p.state === "error") {
+          console.error("[Gateway] chat error:", p.errorMessage);
+          setTyping(false);
+          setMessages((prev) => prev.map((m) => m.streaming ? { ...m, streaming: false } : m));
+        }
+        return;
+      }
+
+      // 4. Handle agent event (tool use output, etc.)
+      if (frame.type === "event" && frame.event === "agent") {
+        const p = frame.payload;
+        if (p?.stream === "assistant" && p?.data?.text) {
+          const agentText = cleanAIText(p.data.text);
+          if (agentText) {
+            setMessages((prev) => {
+              const last = prev[prev.length - 1];
+              if (last && last.role === "ai" && last.runId === p.runId) {
+                return [...prev.slice(0, -1), { ...last, content: cleanAIText((last.content || "") + p.data.text) }];
+              }
+              return [...prev, {
+                id: generateUUID(), role: "ai", content: agentText,
+                time: new Date().toISOString(), runId: p.runId, streaming: true,
+              }];
+            });
+          }
+        }
+      }
+    };
+
+    ws.onclose = () => {
+      console.log("[Gateway] ws closed, will reconnect in", backoff.current, "ms");
+      setConnected(false);
+      wsRef.current = null;
+      reconnectTimer.current = setTimeout(() => {
+        backoff.current = Math.min(backoff.current * 1.5, 10000);
+        connect.current();
+      }, backoff.current);
+    };
+
+    ws.onerror = (err) => {
+      console.error("[Gateway] ws error:", err);
+    };
+  });
+
+  useEffect(() => {
+    connect.current();
+    return () => {
+      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+      if (wsRef.current) wsRef.current.close();
+    };
+  }, []);
+
+  function sendMessage(text) {
+    if (!wsRef.current || wsRef.current.readyState !== 1) return;
+    const id = generateUUID();
+    const idempotencyKey = generateUUID();
+    const req = {
+      type: "req",
+      id,
+      method: "chat.send",
+      params: {
+        sessionKey: SESSION_KEY,
+        message: text,
+        idempotencyKey,
+      },
+    };
+    pendingRef.current.set(id, {
+      resolve: () => {},
+      reject: (err) => console.warn("[Gateway] chat.send error:", err),
+    });
+    wsRef.current.send(JSON.stringify(req));
+    setMessages((prev) => [...prev, {
+      id: generateUUID(), role: "user", content: text, time: new Date().toISOString(),
+    }]);
+    setTyping(true);
+  }
+
+  return { connected, messages, typing, sendMessage };
+}
+
+function ChatPage({ theme, onToggleTheme }) {
+  const { connected, messages, typing, sendMessage } = useGateway();
+  const [input, setInput] = useState("");
+  const scrollRef = useRef(null);
+
+  useEffect(() => { document.title = "另一半 | 对话"; }, []);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, typing]);
+
+  function handleSend(e) {
+    e.preventDefault();
+    const text = input.trim();
+    if (!text) return;
+    sendMessage(text);
+    setInput("");
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend(e);
+    }
+  }
+
+  return (
+    <div className="chat-page" data-theme={theme}>
+      {/* Header */}
+      <header className="chat-header">
+        <div className="chat-header-inner">
+          <a href="/" className="chat-back-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </a>
+          <div className="chat-header-info">
+            <h1 className="chat-header-name">另一半</h1>
+            <span className={`chat-status ${connected ? "chat-status-online" : ""}`}>
+              {connected ? "在线" : "连接中..."}
+            </span>
+          </div>
+          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+        </div>
+      </header>
+
+      {/* Messages */}
+      <main className="chat-messages" ref={scrollRef}>
+        {messages.length === 0 && !typing && (
+          <div className="chat-empty">
+            <img src="/in-love.jpg" alt="另一半" className="chat-empty-avatar" />
+            <p className="chat-empty-title">嘿，你来了</p>
+            <p className="chat-empty-sub">我是你的「另一半」，想聊什么都可以</p>
+          </div>
+        )}
+        {messages.map((msg, idx) => {
+          const showTime = idx === 0 || (new Date(msg.time) - new Date(messages[idx - 1]?.time)) > 300000;
+          return (
+            <React.Fragment key={msg.id}>
+              {showTime && msg.time && (
+                <div className="chat-time">{new Date(msg.time).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}</div>
+              )}
+              <div className={`chat-msg ${msg.role === "user" ? "chat-msg-user" : "chat-msg-ai"}`}>
+                {msg.role === "ai" && (
+                  <img src="/gril1.jpg" alt="AI" className="chat-msg-avatar" />
+                )}
+                <div className={`chat-bubble ${msg.role === "user" ? "chat-bubble-green" : "chat-bubble-white"}`}>
+                  {msg.content}
+                </div>
+                {msg.role === "user" && (
+                  <img src="/boy1.jpg" alt="You" className="chat-msg-avatar" />
+                )}
+              </div>
+            </React.Fragment>
+          );
+        })}
+        {typing && (
+          <div className="chat-msg chat-msg-ai">
+            <img src="/gril1.jpg" alt="AI" className="chat-msg-avatar" />
+            <div className="chat-bubble chat-bubble-white chat-typing">
+              <span className="typing-dot" />
+              <span className="typing-dot" />
+              <span className="typing-dot" />
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Input */}
+      <footer className="chat-input-bar">
+        <form onSubmit={handleSend} className="chat-input-form">
+          <textarea
+            className="chat-input"
+            placeholder={connected ? "说点什么..." : "等待连接..."}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={!connected}
+            rows={1}
+          />
+          <button type="submit" className="chat-send-btn" disabled={!connected || !input.trim()}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </button>
+        </form>
+      </footer>
     </div>
   );
 }
 
 export default function App() {
   const { theme, toggle } = useTheme();
-  const isDashboard = window.location.pathname.startsWith("/dashboard");
-  if (isDashboard) return <DashboardPage theme={theme} onToggleTheme={toggle} />;
+  const path = window.location.pathname;
+  if (path.startsWith("/dashboard")) return <DashboardPage theme={theme} onToggleTheme={toggle} />;
+  if (path.startsWith("/chat")) return <ChatPage theme={theme} onToggleTheme={toggle} />;
   return <LandingPage theme={theme} onToggleTheme={toggle} />;
 }
